@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Warning page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      padding: 0;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-weight: 700;
+    }
+
+    #notfound {
+      position: relative;
+      height: 100vh;
+    }
+
+    #notfound .notfound-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: url('{{backgroundimage}}');
+      background-size: cover;
+    }
+
+    #notfound .notfound-bg:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+
+    #notfound .notfound {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .notfound {
+      max-width: 700px;
+      width: 100%;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .notfound .notfound-404 {
+      position: relative;
+      height: 120px;
+    }
+
+    .notfound .notfound-404 h1 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      font-weight: 900;
+      margin: 0px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    .notfound h2 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #fff;
+      margin-top: 20px;
+      margin-bottom: 15px;
+    }
+
+    .notfound p {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #fff;
+      margin-top: 20px;
+      margin-bottom: 15px;
+    }
+
+    .notfound .home-btn,
+    .notfound .contact-btn {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: inline-block;
+      font-weight: 700;
+      text-decoration: none;
+      background-color: transparent;
+      border: 2px solid transparent;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 40px;
+      margin: 5px;
+      transition: 0.2s all;
+    }
+
+    .notfound .home-btn:hover,
+    .notfound .contact-btn:hover {
+      opacity: 0.9;
+    }
+
+    .notfound .home-btn {
+      color: rgba(255, 0, 36, 0.7);
+      background: #fff;
+    }
+
+    .notfound .contact-btn {
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    span.url {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      display: block;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    @media only screen and (max-width: 767px) {
+      .notfound .notfound-404 h1 {
+        font-size: 60px;
+      }
+    }
+
+    @media only screen and (max-width: 480px) {
+      .notfound .notfound-404 {
+        height: 100px;
+      }
+
+      .notfound .notfound-404 h1 {
+        font-size: 40px;
+      }
+
+      .notfound h2 {
+        font-size: 16px;
+      }
+
+      .notfound .home-btn,
+      .notfound .contact-btn {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="notfound">
+    <div class="notfound-bg"></div>
+    <div class="notfound">
+      <div class="notfound-404">
+        <h1>⚠️&nbsp;Warning</h1>
+      </div>
+      <h2>Unknown domain in URL</h2>
+      <div id='content'>
+        <p>This page requires JavaScript to display the redirect chain.</p>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  var div = document.getElementById('content');
+  div.innerHTML = '';
+  var url = '{{URL}}';
+  var host = '';
+  while (url) {
+    var urlo = new URL(url);
+    var host = urlo.hostname;
+    var urls = url.replace(host, '<b>' + host + '</b>');
+
+    next = urlo.searchParams.get('url') || urlo.searchParams.get('target') || urlo.searchParams.get('originalUrl');
+
+    if (!next && host === 'secure-web.cisco.com') {
+      next = decodeURIComponent(url.replace(/.*\//, ''));
+    }
+    if (!next && host.endsWith('.mcas.ms')) {
+      u = url;
+      u = u.replace(/\.mcas\.ms\//, '/');
+      u = u.replace(/\?McasTsid=[0-9]*/, '');
+      next = decodeURIComponent(u);
+    }
+    if (host.endsWith('.safelinks.protection.outlook.com')) {
+      host = 'safelinks.outlook.com';
+    }
+    if (host.startsWith('www.')) {
+      host = host.substring(4);
+    }
+
+    cls = next ? 'contact-btn' : 'home-btn';
+    div.innerHTML += '<p>Requested URL<br><span class="url">' + urls + '</span></p>';
+    div.innerHTML += '<a href="' + url + '" class="' + cls + '">Go to ' + host + '</a>';
+
+    url = next;
+  }
+  document.title = 'Warning: ' + host;
+</script>

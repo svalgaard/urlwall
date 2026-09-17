@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urlwall"
+version = "0.1.0"
+description = "Interceptive browser for macOS — confirms unknown domains before opening"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9"
+authors = [
+    { name = "Jens Svalgaard", email = "github@svalgaard.net" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Environment :: MacOS :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+]
+
+[project.scripts]
+url-wall = "urlwall.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/svalgaard/urlwall"
+Repository = "https://github.com/svalgaard/urlwall"
+Issues = "https://github.com/svalgaard/urlwall/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+include = ["urlwall*"]
+
+[tool.setuptools.package-data]
+urlwall = ["html/*.html", "html/*.jpg", "app/*"]
