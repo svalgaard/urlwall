@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 URL-Wall core logic.
 """
@@ -11,7 +10,7 @@ import tempfile
 import urllib.parse
 from pathlib import Path
 
-import urlwall.config as config
+from urlwall import config
 
 __all__ = [
     "getCanonicalHost",
@@ -27,21 +26,20 @@ __all__ = [
 def isWebURL(url):
     """Check whether url is most likely an actual web URL."""
     up = urllib.parse.urlparse(url)
-    return up.scheme in ('http', 'https', 'ftp') and up.netloc
+    return up.scheme in ("http", "https", "ftp") and up.netloc
 
 
 def getCanonicalHost(url):
     """Extract canonical host from a URL (no www., no trailing dot, no port)."""
     host = url
-    if '/' in host:
+    if "/" in host:
         purl = urllib.parse.urlparse(host)
         host = purl.netloc
     # Strip port if present
-    if ':' in host:
-        host = host.rsplit(':', 1)[0]
-    host = host.lower().strip('.')
-    if host.startswith('www.'):
-        host = host[4:]
+    if ":" in host:
+        host = host.rsplit(":", 1)[0]
+    host = host.lower().strip(".")
+    host = host.removeprefix("www.")
     return host
 
 
@@ -49,10 +47,9 @@ def niceHost(url):
     """Human-readable host name for display."""
     up = urllib.parse.urlparse(url)
     host = up.netloc.lower()
-    if host.startswith('www.'):
-        host = host[4:]
-    if host.endswith('.safelinks.protection.outlook.com'):
-        host = 'safelinks.outlook.com'
+    host = host.removeprefix("www.")
+    if host.endswith(".safelinks.protection.outlook.com"):
+        host = "safelinks.outlook.com"
     return host
 
 
@@ -68,8 +65,8 @@ def unwrap(url):
         query = urllib.parse.parse_qs(up.query)
 
         # Cisco web proxy: https://secure-web.cisco.com/...#...
-        if up.netloc == 'secure-web.cisco.com':
-            m = re.match(r'^([^#]+)/(.+)$', url)
+        if up.netloc == "secure-web.cisco.com":
+            m = re.match(r"^([^#]+)/(.+)$", url)
             if m:
                 url1, url2 = m.groups()
                 url2 = urllib.parse.unquote(url2)
@@ -78,7 +75,7 @@ def unwrap(url):
                     continue
 
         # Common redirect query params
-        for q in ('url', 'target', 'rd'):
+        for q in ("url", "target", "rd"):
             if q in query and query[q] and isWebURL(query[q][0]):
                 url = query[q][0]
                 break
@@ -100,9 +97,9 @@ def isUrlAllowed(url, _seen=None, _depth=0):
     # First unwrap query params to find nested URLs
     up = urllib.parse.urlparse(url)
     query = urllib.parse.parse_qs(up.query)
-    for key in ('q', 'url'):
+    for key in ("q", "url"):
         for val in query.get(key, []):
-            if val.startswith('http://') or val.startswith('https://'):
+            if val.startswith(("http://", "https://")):
                 return isUrlAllowed(val, _seen, _depth + 1)
 
     # Then check the canonical host
@@ -116,7 +113,7 @@ def writeWarningHTML(urls):
     Returns the path to a temp file containing the rendered page.
     """
     assert urls
-    url_pairs = list((niceHost(url), url) for url in urls)
+    url_pairs = [(niceHost(url), url) for url in urls]
 
     # Read template from package resources (works when installed via pip)
     template_path = Path(__file__).parent / "html" / "template.html"
@@ -146,15 +143,15 @@ def openURL(url):
     """Open a URL through the URL-Wall gate."""
     try:
         # Normalize: ensure https scheme
-        if not url.startswith('http'):
-            if not url.startswith('//'):
-                url = '//' + url
-            url = 'https:' + url
+        if not url.startswith("http"):
+            if not url.startswith("//"):
+                url = "//" + url
+            url = "https:" + url
 
         # Log
         log_fn = config.getConfig().logFile
-        with open(log_fn, 'a') as log:
-            log.write(f'{url}\n')
+        with open(log_fn, "a") as log:
+            log.write(f"{url}\n")
 
         # Unwrap redirect chains
         chain = unwrap(url)
@@ -171,11 +168,12 @@ def openURL(url):
             url = tfn
 
         browser = config.getConfig().getBrowser()
-        subprocess.call(['/usr/bin/open', '-a', browser, url])
-    except Exception as e:
+        subprocess.call(["/usr/bin/open", "-a", browser, url])
+    except OSError as e:
         # Log error but still open to avoid losing the URL entirely
-        print(f'URL-Wall error: {e}', file=sys.stderr)
+        print(f"URL-Wall error: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc(file=sys.stderr)
         # Open in default browser (not user's preferred) as a safe fallback
-        subprocess.call(['/usr/bin/open', url])
+        subprocess.call(["/usr/bin/open", url])

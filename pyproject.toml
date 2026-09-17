@@ -40,6 +40,9 @@ test = [
     "pytest",
     "pytest-cov",
 ]
+lint = [
+    "ruff",
+]
 
 [tool.setuptools.packages.find]
 include = ["urlwall*"]

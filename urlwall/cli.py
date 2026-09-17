@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 URL-Wall CLI wrapper.
 
@@ -20,10 +19,10 @@ if bundle_root not in sys.path:
 
 from urlwall.__main__ import main
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # If called with no args, read URL from stdin (piped by AppleScript)
     if len(sys.argv) == 1 and not sys.stdin.isatty():
         url = sys.stdin.read().strip()
         if url:
-            sys.argv = ['urlwall', url]
+            sys.argv = ["urlwall", url]
     main()
